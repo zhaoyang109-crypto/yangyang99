@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登了duang啷</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap');
+
+:root {
+  --pink: #FF6EC7;
+  --green: #39FF14;
+  --purple: #B44FFF;
+  --silver: #C0C0C0;
+  --dark: #0A0A1A;
+  --darker: #060610;
+  --card: rgba(255,110,199,0.08);
+  --border-pink: rgba(255,110,199,0.4);
+  --border-green: rgba(57,255,20,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Space Grotesk', 'PingFang SC', sans-serif;
+  background: var(--darker);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 背景网格 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,110,199,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,110,199,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 背景光晕 */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(180,79,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-orb {
+  position: fixed;
+  bottom: -150px; right: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(57,255,20,0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.card {
+  background: rgba(10,10,26,0.95);
+  border: 1px solid var(--border-pink);
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 580px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 0 40px rgba(255,110,199,0.1),
+    0 0 80px rgba(180,79,255,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* 顶部装饰条 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--green));
+  border-radius: 24px 24px 0 0;
+}
+
+/* ── 封面 ── */
+#screen-cover { text-align: center; }
+
+.cover-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,110,199,0.2), rgba(180,79,255,0.2));
+  border: 1px solid var(--border-pink);
+  color: var(--pink);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.cover-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+}
+
+.cover-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.disclaimer {
+  background: rgba(57,255,20,0.06);
+  border: 1px solid rgba(57,255,20,0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.7;
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.disclaimer strong {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.level-chip {
+  background: rgba(255,110,199,0.06);
+  border: 1px solid var(--border-pink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.level-chip .name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pink);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.level-chip .pct {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+}
+
+.level-chip.special {
+  border-color: var(--border-green);
+  grid-column: span 2;
+}
+
+.level-chip.special .name { color: var(--green); }
+
+/* ── 按钮 ── */
+.btn-start {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 18px 56px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 0 30px rgba(255,110,199,0.3), 0 0 60px rgba(255,110,199,0.1);
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.btn-start::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left .4s;
+}
+
+.btn-start:hover::before { left: 100%; }
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(255,110,199,0.5), 0 0 80px rgba(255,110,199,0.2);
+}
+.btn-start:active { transform: translateY(0); }
+
+/* ── 答题 ── */
+#screen-quiz { display: none; }
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.q-counter {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.q-dim {
+  font-size: 11px;
+  color: var(--pink);
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(255,110,199,0.1);
+  border: 1px solid rgba(255,110,199,0.2);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* 登味儿浓度计 */
+.meter-wrap {
+  margin-bottom: 28px;
+}
+
+.meter-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.meter-label span {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.meter-label .meter-val {
+  color: var(--pink);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.meter-track {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,110,199,0.2);
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green), var(--pink), var(--purple));
+  transition: width .5s cubic-bezier(.22,1,.36,1);
+  position: relative;
+}
+
+.meter-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0;
+  width: 8px; height: 100%;
+  background: rgba(255,255,255,0.6);
+  border-radius: 999px;
+  filter: blur(2px);
+}
+
+.q-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  min-height: 60px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opt {
+  background: rgba(255,110,199,0.04);
+  border: 1px solid rgba(255,110,199,0.2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+  transition: all .18s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.opt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,110,199,0.08), rgba(180,79,255,0.08));
+  opacity: 0;
+  transition: opacity .18s;
+}
+
+.opt:hover {
+  border-color: var(--pink);
+  color: #fff;
+  transform: translateX(4px);
+  box-shadow: 0 0 20px rgba(255,110,199,0.1);
+}
+
+.opt:hover::before { opacity: 1; }
+
+.opt.selected {
+  border-color: var(--pink);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255,110,199,0.15), inset 0 0 20px rgba(255,110,199,0.05);
+}
+
+.opt.selected::before { opacity: 1; }
+
+.opt-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--pink);
+  flex-shrink: 0;
+  width: 22px;
+  margin-top: 1px;
+}
+
+/* ── 加载动画 ── */
+#screen-loading {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.loading-title {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 32px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.97); }
+}
+
+.loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.loading-step {
+  font-size: 14px;
+  color: rgba(255,255,255,0.25);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: color .3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-step.active {
+  color: var(--green);
+}
+
+.loading-step.done {
+  color: rgba(255,255,255,0.4);
+}
+
+.step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  transition: background .3s;
+}
+
+.loading-step.active .step-dot {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: blink .6s infinite;
+}
+
+.loading-step.done .step-dot {
+  background: rgba(255,255,255,0.3);
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.duang-text {
+  font-size: 64px;
+  font-weight: 900;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all .4s cubic-bezier(.34,1.56,.64,1);
+  background: linear-gradient(135deg, var(--pink), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.duang-text.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── 结果 ── */
+#screen-result { display: none; }
+
+.result-header { text-align: center; margin-bottom: 28px; }
+
+.result-index-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.result-pct {
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.result-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.result-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1px;
+}
+
+/* 结果进度条 */
+.result-meter {
+  margin-bottom: 28px;
+}
+
+.result-meter-track {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,110,199,0.2);
+  border-radius: 999px;
+  height: 16px;
+  overflow: hidden;
+}
+
+.result-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green), var(--pink), var(--purple));
+  width: 0%;
+  transition: width 1.4s cubic-bezier(.22,1,.36,1);
+  position: relative;
+}
+
+.result-meter-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0;
+  width: 12px; height: 100%;
+  background: rgba(255,255,255,0.7);
+  border-radius: 999px;
+  filter: blur(3px);
+}
+
+.result-desc {
+  background: rgba(255,110,199,0.05);
+  border: 1px solid var(--border-pink);
+  border-radius: 16px;
+  padding: 20px 22px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* 维度分析 */
+.dim-section {
+  margin-bottom: 24px;
+}
+
+.dim-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--green);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.dim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dim-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dim-name {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  width: 80px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.dim-bar-track {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: 0%;
+  transition: width 1s cubic-bezier(.22,1,.36,1);
+}
+
+.dim-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dim-analysis {
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.7;
+  margin-top: 6px;
+}
+
+/* 底部按钮 */
+.btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.btn-share {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 0 30px rgba(255,110,199,0.2);
+  transition: all .2s;
+}
+
+.btn-share:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(255,110,199,0.4);
+}
+
+.btn-retry {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .2s;
+}
+
+.btn-retry:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.fade-in {
+  animation: fadeIn .35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 星星装饰 */
+.star {
+  position: fixed;
+  width: 3px; height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle var(--d, 3s) var(--delay, 0s) infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes twinkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.6; transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+
+<!-- 星星 -->
+<script>
+for(let i=0;i<30;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*100}vh;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s`;
+  document.body.appendChild(s);
+}
+</script>
+
+<div class="card" id="main-card">
+
+  <!-- ── 封面 ── -->
+  <div id="screen-cover">
+    <div class="cover-badge">✦ 登味儿自测 2025 ✦</div>
+    <div class="cover-title">登了duang啷</div>
+    <div class="cover-sub">15道题，测出你骨子里的登味儿浓度<br>以及你到底在哪里最登</div>
+
+    <div class="disclaimer">
+      <strong>免责声明：</strong>本测试结果仅供娱乐参考，不构成任何心理诊断、人格鉴定或道德审判。测试结果偏高不代表你是坏人，偏低不代表你已经得道。如测试结果引发不适，请先喝杯水，再想想为什么别人都没不适就你不适。
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">开始检测登味儿浓度 ✦</button>
+    <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.2);text-align:center;">共15题 · 约8-10分钟</div>
+  </div>
+
+  <!-- ── 答题 ── -->
+  <div id="screen-quiz">
+    <div class="quiz-header">
+      <div class="q-counter" id="q-counter">01 / 15</div>
+      <div class="q-dim" id="q-dim"></div>
+    </div>
+
+    <div class="meter-wrap">
+      <div class="meter-label">
+        <span>登味儿浓度计</span>
+        <span class="meter-val" id="meter-val">0%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="meter-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- ── 加载 ── -->
+  <div id="screen-loading">
+    <div class="loading-title">检测中...</div>
+    <div class="loading-steps" id="loading-steps"></div>
+    <div class="duang-text" id="duang-text">duang啷！</div>
+  </div>
+
+  <!-- ── 结果 ── -->
+  <div id="screen-result">
+    <div class="result-header">
+      <div class="result-index-label">你的登味儿指数</div>
+      <div class="result-pct" id="result-pct"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-subtitle" id="result-subtitle"></div>
+    </div>
+
+    <div class="result-meter">
+      <div class="result-meter-track">
+        <div class="result-meter-fill" id="result-meter-fill"></div>
+      </div>
+    </div>
+
+    <div class="result-desc" id="result-desc"></div>
+
+    <div class="dim-section">
+      <div class="dim-title">✦ 你的登味儿成分分析</div>
+      <div class="dim-list" id="dim-list"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-share" onclick="shareResult()">分享给朋友 ✦</button>
+      <button class="btn-retry" onclick="restartQuiz()">再测一次</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 数据 ──────────────────────────────────────────────
+const DIMS = ["认知惰性","权力惯性","自我认知盲区","边界感缺失","共情缺失"];
+const DIM_COLORS = ["#FF6EC7","#B44FFF","#39FF14","#FF9F0A","#00D4FF"];
+
+const QUESTIONS = [
+  // 维度一：认知惰性
+  {dim:0, text:"朋友跟你说最近有一件事让他很困扰，你的第一反应是？", opts:[
+    "先问问Ta现在最需要什么，倾诉还是建议",
+    "一边听一边帮Ta梳理，这样沟通效率更高",
+    "根据我的经验这种情况一般是XX，先帮Ta分析一下",
+    "朋友有困难当然要帮，马上给Ta几条可执行的建议，别在情绪里耗着"
+  ]},
+  {dim:0, text:"你所在的领域出现了一个新趋势/新工具，你的态度是？", opts:[
+    "先去了解一下，说不定有意思",
+    "看看别人用得怎么样再说",
+    "评估了一下，和现有的方法本质差不多，暂时不需要换",
+    "这种东西见多了，风口过了还是得回到基本功，别被带跑"
+  ]},
+  {dim:0, text:"有人做事的方式和你不一样，但结果也还不错，你会？", opts:[
+    "挺好奇的，想了解他怎么想的",
+    "结果不错就好，方式是他的事",
+    "结果可以，但方式上还是有值得改进的地方",
+    "这次结果好不代表方式是对的，成功有时候靠的是运气"
+  ]},
+  // 维度二：权力惯性
+  {dim:1, text:"新来的同事在做一件你很熟悉的事，你会？", opts:[
+    "等Ta遇到问题来问再说",
+    "提醒一两个容易踩的坑，点到为止",
+    "把我的经验系统讲一遍，少走弯路，这是我能给的最大帮助",
+    "在旁边跟着，随时纠正，新人最需要的就是及时反馈"
+  ]},
+  {dim:1, text:"朋友做了一个你觉得不太对的决定，但没有问你意见，你会？", opts:[
+    "他的决定，我尊重",
+    "找个自然的时机问问他有没有想清楚",
+    "直接说，真朋友就得说实话",
+    "说「我不干涉你，但有些话我不说良心过不去……」然后说了很多"
+  ]},
+  {dim:1, text:"会议上有人提出了一个你觉得非常不成熟的想法，你会？", opts:[
+    "听完，有意思的地方回应一下",
+    "帮他指出几个不完善的地方",
+    "先肯定再转折——「这个方向有意思，但核心问题是……」",
+    "说白了这个思路走不通，我来说说这件事本质上应该怎么看"
+  ]},
+  // 维度三：自我认知盲区
+  {dim:2, text:"有人当面说你「有点登」，你的第一反应是？", opts:[
+    "认真想了想，好像确实有道理",
+    "有点不舒服，但事后会想想",
+    "笑着说「哈哈我知道我登」，其实没太当回事",
+    "觉得对方玻璃心，我只是说了实话而已"
+  ]},
+  {dim:2, text:"你上一次主动改变一个固有看法，是什么时候？", opts:[
+    "最近就有，被某件事或某个人触动了",
+    "有过，但不算频繁",
+    "想了一下，好像想不起来具体是什么",
+    "我的判断都是有来历的，没什么需要改的"
+  ]},
+  {dim:2, text:"你觉得自己和「登」的距离有多远？", opts:[
+    "我肯定也会登，一直在提醒自己",
+    "偶尔有一点，但整体还好",
+    "比起我身边的人，我已经挺克制的了",
+    "我不觉得我登，我只是有自己的标准和判断"
+  ]},
+  // 维度四：边界感缺失
+  {dim:3, text:"聚会上有人开了个荤玩笑，全场反应不一，你会？", opts:[
+    "注意到有人笑得不自在，找个话题带过去",
+    "跟着气氛笑笑，不主动接",
+    "觉得好笑就接一句，大家都是朋友没什么",
+    "都是成年人，荤一点才接地气，太正经反而尴尬"
+  ]},
+  {dim:3, text:"你给朋友推荐了一款饮料，Ta试过后说「一般般」，你会？", opts:[
+    "口味这种事本来就因人而异，没关系",
+    "有点意外，想问问哪里觉得一般",
+    "这个饮料有点门槛，可能需要喝几次才能懂它好在哪",
+    "有点遗憾，可能我们的品味不太一样"
+  ]},
+  {dim:3, text:"身边有人的生活方式和你很不一样，你会？", opts:[
+    "各有各的活法，挺好的",
+    "偶尔会想「这样真的好吗」，但不会说",
+    "找机会聊聊，分享一下我的想法，朋友嘛",
+    "看不下去还是会说，不说才是不关心"
+  ]},
+  // 维度五：共情缺失
+  {dim:4, text:"朋友说最近压力很大、有点撑不住，你的第一反应是？", opts:[
+    "先问他怎么了，认真听",
+    "说「我理解，我之前也有过这种阶段」",
+    "说「想开点，其实没你想的那么严重」",
+    "说「谁都有这种时候，扛过去就好了」然后聊别的"
+  ]},
+  {dim:4, text:"你听到有人抱怨某件事「不公平」，你的内心反应是？", opts:[
+    "想先了解他说的不公平具体是什么",
+    "可能真的有问题，但也可能是他的视角有限",
+    "哪里都有不公平，这个道理早点想通比较好",
+    "与其抱怨不公平，不如想想自己能做什么，抱怨解决不了问题"
+  ]},
+  {dim:4, text:"有人说某个群体普遍面临某种困境，你的反应是？", opts:[
+    "愿意听，哪怕和自己的经验不符",
+    "部分认同，但每个人情况不一样",
+    "感觉有点夸大，不至于所有人都这样吧",
+    "这种说法容易制造对立，问题没那么简单"
+  ]}
+];
+
+const SCORES = [1,3,5,7];
+
+const LEVELS = [
+  {min:15,max:24,pct:"0%",title:"无登一身轻",sub:"登界稀有动物，系统检测异常",
+   desc:"你是这个测试里的稀有物种。我们的检测仪器对你毫无反应，技术团队怀疑是设备故障，反复测试三次后得出结论：你真的没登。你活得清醒、边界感清晰、从不觉得别人的人生需要你来优化。你是稀有动物，请好好保护自己。（但说真的，你确定你没有在骗自己吗？）",
+   meterPct:2},
+  {min:25,max:34,pct:"1%",title:"路易威登",sub:"LV本V，登界入门款",
+   desc:"LV本V，登界入门款。你的登还很嫩，嫩到自己都没意识到——但它已经在了。你偶尔会在心里默默帮别人「改方案」，忍住没说，但眼神出卖了你。朋友们还觉得你可爱，请珍惜这个窗口期。",
+   meterPct:12},
+  {min:35,max:44,pct:"10%",title:"登门拜访",sub:"已经敲门了，不等回答就进来了",
+   desc:"你的登已经敲门了。它穿着体面，礼貌地问「我可以进来吗」，然后不等回答就进来了，还顺手帮你重新摆了一下家具。你的出发点是好的，问题是——没人请你来。",
+   meterPct:28},
+  {min:45,max:54,pct:"50%",title:"自登自受",sub:"登味儿中等偏上，长势喜人",
+   desc:"登味儿中等偏上，日常高频可见。「我只是说实话」「我这是为你好」「你现在不懂以后就懂了」——这三句话你至少说过其中一句。你的登已经发育成熟，长势喜人，偶尔还会开花结果，果实叫做「别人当面点头背后翻白眼」。",
+   meterPct:48},
+  {min:55,max:64,pct:"100%",title:"捷足先登",sub:"不只是登，还抢跑",
+   desc:"你不只是登，你还抢跑。别人还没开口，你已经分析完了、结论出来了、解决方案备好了。你的经验是真实的，你的判断经常是对的，但你的朋友已经学会了一种新技能——「听你说完，然后还是按自己的来」。你知道吗？",
+   meterPct:62},
+  {min:65,max:74,pct:"1000%",title:"登鼻子上脸",sub:"登味儿已经溢出屏幕",
+   desc:"登味儿已经溢出屏幕了。你对自己的一套有谜之自信，对新事物保持健康的怀疑，对别人的情绪有时候会做一个快速的理性降级处理——「至于吗」「想太多了」「成熟一点」。你身边的人已经进化出了一种能力：在你开口的瞬间提前做好心理建设。",
+   meterPct:75},
+  {min:75,max:84,pct:"10000%",title:"一步登天",sub:"你已经飞升，地面很远了",
+   desc:"你已经飞升了。地面上的人仰望你，不是因为你高，而是因为他们已经习惯了你在上面俯视他们。你的话有一种天然的终结感——说完之后现场会安静三秒，没人接话，不是因为你说得对，而是因为反驳你的成本太高了。你把这种安静理解为认同，对吗？",
+   meterPct:88},
+  {min:85,max:105,pct:"1000000000000000%",title:"登峰造极",sub:"宇宙级登神，前无古人",
+   desc:"宇宙级登神，前无古人。你的登已经自成哲学体系，逻辑严密，无懈可击，连漏洞都长得像真理。你不觉得自己登，你觉得自己只是「看得比较清楚」。历史上每一位登峰造极的人都这么觉得。宇宙在等你，duang——你登上去了。",
+   meterPct:99}
+];
+
+const DIM_ANALYSIS = [
+  // 认知惰性
+  [
+    "你的脑子还在转。遇到新情况你会真的重新想一遍，而不是直接调出1998年存档的答案糊上去。这很了不起，因为很多人的脑子在某个时间节点之后就光荣退休了，本人浑然不知。",
+    "你的经验库存丰富，偶尔用得稍微顺手了一点点。你的判断大多数时候是对的，但请注意：「大多数时候对」不等于「我说的就是对的」，这两句话差了一个登的距离。",
+    "你的经验已经进化成了一道自动防火墙。新信息进来，先过滤，不符合已有认知的一律标记为「年轻人不懂事」。系统运行流畅，唯一的问题是——防火墙也把好奇心挡在门外了。"
+  ],
+  // 权力惯性
+  [
+    "你对话语权没什么执念，别人的人生不需要你来总监督导。能做到「别人没问就不说」的人少得可怜——大部分人嘴里说「我不干涉」，手已经伸出去了。",
+    "你有表达欲，也有分寸感，但两者偶尔会打架。你说出口的那几次「我只是随便说说」，有几次其实是真的忍不住——不说浑身难受，说完神清气爽，这个你懂的。",
+    "你天然觉得自己有责任说，不说是浪费，说了是贡献——这套逻辑让你说话特别心安理得。但我好奇，这份责任感，是谁给你授权的？对方签字了吗？"
+  ],
+  // 自我认知盲区
+  [
+    "你有清醒的自我认知，而且不怕被挑战。被人指出问题你不会立刻进入防御模式，而是真的会坐下来想一想。这种开放性是对抗「登」最有效的疫苗，建议每年加强一针。",
+    "你知道自己有盲区，但盲区长什么样不太确定。你会反思，但反思有时候更像一个仪式——做完了，心安了，然后该怎样还是怎样。",
+    "你的自我认知系统装了一个特别贴心的过滤器：只显示对自己有利的部分。你觉得自己挺通透，但「我就是这样的人」和「我没觉得有什么问题」这两句话，你说得比你意识到的频繁多了。"
+  ],
+  // 边界感缺失
+  [
+    "你清楚地知道哪里是你的地盘，哪里不是。你活明白了一件事：管好自己已经是全职工作了，哪有那么多精力优化别人的人生。",
+    "你大多数时候守得住，但遇到「我真的觉得对方需要听一听」的时候会把持不住。跨过去之前建议先问自己：是对方需要，还是你需要说？",
+    "「我是为你好」在你这里是一张无限次使用的通行证。你有没有想过，有时候最好的关心，是什么都不说？"
+  ],
+  // 共情缺失
+  [
+    "你真的在听，不是在等对方说完然后轮到你表演。在一个到处都是「想开点」「成熟一点」的世界里，你是个稀缺物种。",
+    "你有共情能力，但有时候会不自觉地用「我的经历」替换「对方的经历」。「我理解，我之前也这样」是善意的——但它悄悄把对话主角从对方换成了你，而且换得天衣无缝。",
+    "别人的情绪到了你这里会经历快速处理：「至于吗」「想开点」「扛过去就好了」。你不是坏人，你只是效率很高——高到跳过了「让对方感受到被看见」这个步骤。"
+  ]
+];
+
+// ── 状态 ──────────────────────────────────────────────
+let current = 0;
+let answers = [];
+let dimScores = [0,0,0,0,0];
+let totalScore = 0;
+let answering = false;
+let runningScore = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ── 开始 ──────────────────────────────────────────────
+function startQuiz() {
+  current=0; answers=[]; dimScores=[0,0,0,0,0]; totalScore=0; runningScore=0;
+  show('screen-quiz');
+  renderQuestion();
+}
+
+function show(id) {
+  ['screen-cover','screen-quiz','screen-loading','screen-result'].forEach(s=>{
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+}
+
+// ── 渲染题目 ──────────────────────────────────────────
+function renderQuestion() {
+  answering = false;
+  const q = QUESTIONS[current];
+  const n = current+1;
+
+  document.getElementById('q-counter').textContent = `${String(n).padStart(2,'0')} / 15`;
+  document.getElementById('q-dim').textContent = DIMS[q.dim];
+  document.getElementById('q-text').textContent = q.text;
+
+  // 进度条
+  const pct = Math.round((runningScore / (current * 7 + 7)) * 100) || 0;
+  updateMeter(pct);
+
+  // 打乱选项
+  const labels = ['A','B','C','D'];
+  const indexed = q.opts.map((text,i)=>({text, score:SCORES[i]}));
+  const shuffled = shuffle(indexed);
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  shuffled.forEach((opt,i)=>{
+    const el = document.createElement('div');
+    el.className = 'opt fade-in';
+    el.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${opt.text}</span>`;
+    el.onclick = ()=>selectOpt(el, opt.score, q.dim);
+    container.appendChild(el);
+  });
+}
+
+function updateMeter(pct) {
+  document.getElementById('meter-fill').style.width = pct+'%';
+  document.getElementById('meter-val').textContent = pct+'%';
+}
+
+// ── 选择选项 ──────────────────────────────────────────
+function selectOpt(el, score, dim) {
+  if(answering) return;
+  answering = true;
+
+  document.querySelectorAll('.opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+
+  runningScore += score;
+  dimScores[dim] += score;
+  answers.push(score);
+
+  const pct = Math.round((runningScore / ((current+1)*7)) * 100);
+  updateMeter(pct);
+
+  setTimeout(()=>{
+    current++;
+    if(current < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      totalScore = answers.reduce((a,b)=>a+b,0);
+      showLoading();
+    }
+  }, 380);
+}
+
+// ── 加载动画 ──────────────────────────────────────────
+const LOADING_STEPS = [
+  "正在提取登味儿样本…",
+  "检测认知惰性浓度…",
+  "校准权力惯性读数…",
+  "扫描自我认知盲区…",
+  "分析边界感数据…",
+  "比对共情缺失指数…",
+  "登味儿数据库匹配中…"
+];
+
+function showLoading() {
+  show('screen-loading');
+  const container = document.getElementById('loading-steps');
+  container.innerHTML = LOADING_STEPS.map((s,i)=>
+    `<div class="loading-step" id="step-${i}">
+      <div class="step-dot"></div>${s}
+    </div>`
+  ).join('');
+
+  let i=0;
+  const interval = setInterval(()=>{
+    if(i>0) {
+      document.getElementById(`step-${i-1}`).classList.remove('active');
+      document.getElementById(`step-${i-1}`).classList.add('done');
+    }
+    if(i<LOADING_STEPS.length) {
+      document.getElementById(`step-${i}`).classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(()=>{
+        const d = document.getElementById('duang-text');
+        d.classList.add('show');
+        setTimeout(showResult, 800);
+      }, 300);
+    }
+  }, 350);
+}
+
+// ── 结果 ──────────────────────────────────────────────
+function showResult() {
+  show('screen-result');
+
+  const level = LEVELS.find(l=>totalScore>=l.min&&totalScore<=l.max)||LEVELS[LEVELS.length-1];
+
+  document.getElementById('result-pct').textContent = level.pct;
+  document.getElementById('result-title').textContent = level.title;
+  document.getElementById('result-subtitle').textContent = level.sub;
+  document.getElementById('result-desc').textContent = level.desc;
+
+  setTimeout(()=>{
+    document.getElementById('result-meter-fill').style.width = level.meterPct+'%';
+  }, 100);
+
+  // 维度分析
+  const container = document.getElementById('dim-list');
+  container.innerHTML = '';
+  DIMS.forEach((name,i)=>{
+    const score = dimScores[i];
+    const pct = Math.round((score/21)*100);
+    const tier = score<=9 ? 0 : score<=14 ? 1 : 2;
+    const color = DIM_COLORS[i];
+
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div class="dim-item">
+        <div class="dim-name">${name}</div>
+        <div class="dim-bar-track">
+          <div class="dim-bar-fill" id="dim-bar-${i}" style="background:${color}"></div>
+        </div>
+        <div class="dim-score">${score}/21</div>
+      </div>
+      <div class="dim-analysis" style="border-color:${color}">${DIM_ANALYSIS[i][tier]}</div>
+    `;
+    container.appendChild(el);
+
+    setTimeout(()=>{
+      document.getElementById(`dim-bar-${i}`).style.width = pct+'%';
+    }, 200 + i*100);
+  });
+
+  document.getElementById('screen-result').classList.add('fade-in');
+}
+
+// ── 分享 ──────────────────────────────────────────────
+function shareResult() {
+  const title = document.getElementById('result-title').textContent;
+  const pct = document.getElementById('result-pct').textContent;
+  const text = `我测出来是「${title}」！登味指数${pct}\n快来测测你是哪种登 👉 登了duang啷`;
+  if(navigator.share) {
+    navigator.share({title:'登了duang啷', text, url:window.location.href}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>{
+      alert('已复制到剪贴板，快去分享给朋友！✦');
+    }).catch(()=>{
+      alert('截图分享更方便哦 📸');
+    });
+  }
+}
+
+function restartQuiz() {
+  show('screen-cover');
+}
+</script>
+</body>
+</html>
