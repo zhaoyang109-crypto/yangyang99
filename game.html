@@ -225,10 +225,10 @@ body::after {
 }
 
 .q-counter {
-  font-size: 12px;
-  color: rgba(255,255,255,0.35);
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-size: 22px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 800;
+  letter-spacing: 2px;
 }
 
 .q-dim {
@@ -242,57 +242,7 @@ body::after {
   border-radius: 999px;
 }
 
-/* 登味儿浓度计 */
-.meter-wrap {
-  margin-bottom: 28px;
-}
-
-.meter-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.meter-label span {
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-.meter-label .meter-val {
-  color: var(--pink);
-  font-weight: 800;
-  font-size: 12px;
-}
-
-.meter-track {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,110,199,0.2);
-  border-radius: 999px;
-  height: 12px;
-  overflow: hidden;
-  position: relative;
-}
-
-.meter-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), var(--pink), var(--purple));
-  transition: width .5s cubic-bezier(.22,1,.36,1);
-  position: relative;
-}
-
-.meter-fill::after {
-  content: '';
-  position: absolute;
-  right: 0; top: 0;
-  width: 8px; height: 100%;
-  background: rgba(255,255,255,0.6);
-  border-radius: 999px;
-  filter: blur(2px);
-}
+/* 登味儿浓度计（答题中隐藏）*/
 
 .q-text {
   font-size: 20px;
@@ -531,6 +481,85 @@ body::after {
   margin-bottom: 24px;
 }
 
+/* 等级分布图 */
+.level-map-section {
+  margin-bottom: 32px;
+}
+
+.level-map {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.level-map-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: all .3s;
+}
+
+.level-map-active {
+  background: rgba(255,110,199,0.12);
+  border-color: rgba(255,110,199,0.6);
+  box-shadow: 0 0 20px rgba(255,110,199,0.15);
+}
+
+.level-map-bar-wrap {
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  height: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.level-map-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green), var(--pink), var(--purple));
+}
+
+.level-map-active .level-map-bar {
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  box-shadow: 0 0 8px rgba(255,110,199,0.5);
+}
+
+.level-map-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.level-map-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+}
+
+.level-map-active .level-map-title {
+  color: var(--pink);
+}
+
+.level-map-pct {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 600;
+}
+
+.level-map-active .level-map-pct {
+  color: var(--pink);
+}
+
+.level-map-you {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--pink);
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
 /* 维度分析 */
 .dim-section {
   margin-bottom: 24px;
@@ -708,16 +737,6 @@ for(let i=0;i<30;i++){
       <div class="q-dim" id="q-dim"></div>
     </div>
 
-    <div class="meter-wrap">
-      <div class="meter-label">
-        <span>登味儿浓度计</span>
-        <span class="meter-val" id="meter-val">0%</span>
-      </div>
-      <div class="meter-track">
-        <div class="meter-fill" id="meter-fill" style="width:0%"></div>
-      </div>
-    </div>
-
     <div class="q-text" id="q-text"></div>
     <div class="options" id="options"></div>
   </div>
@@ -746,6 +765,11 @@ for(let i=0;i<30;i++){
 
     <div class="result-desc" id="result-desc"></div>
 
+    <div class="level-map-section">
+      <div class="dim-title">✦ 你在登界的位置</div>
+      <div class="level-map" id="level-map"></div>
+    </div>
+
     <div class="dim-section">
       <div class="dim-title">✦ 你的登味儿成分分析</div>
       <div class="dim-list" id="dim-list"></div>
@@ -761,7 +785,7 @@ for(let i=0;i<30;i++){
 
 <script>
 // ── 数据 ──────────────────────────────────────────────
-const DIMS = ["认知惰性","权力惯性","自我认知盲区","边界感缺失","共情缺失"];
+const DIMS = ["认知惰性","权力惯性","自我认知盲区","边界感模糊","共情力迟钝"];
 const DIM_COLORS = ["#FF6EC7","#B44FFF","#39FF14","#FF9F0A","#00D4FF"];
 
 const QUESTIONS = [
@@ -822,7 +846,7 @@ const QUESTIONS = [
     "比起我身边的人，我已经挺克制的了",
     "我不觉得我登，我只是有自己的标准和判断"
   ]},
-  // 维度四：边界感缺失
+  // 维度四：边界感模糊
   {dim:3, text:"聚会上有人开了个荤玩笑，全场反应不一，你会？", opts:[
     "注意到有人笑得不自在，找个话题带过去",
     "跟着气氛笑笑，不主动接",
@@ -841,7 +865,7 @@ const QUESTIONS = [
     "找机会聊聊，分享一下我的想法，朋友嘛",
     "看不下去还是会说，不说才是不关心"
   ]},
-  // 维度五：共情缺失
+  // 维度五：共情力迟钝
   {dim:4, text:"朋友说最近压力很大、有点撑不住，你的第一反应是？", opts:[
     "先问他怎么了，认真听",
     "说「我理解，我之前也有过这种阶段」",
@@ -910,13 +934,13 @@ const DIM_ANALYSIS = [
     "你知道自己有盲区，但盲区长什么样不太确定。你会反思，但反思有时候更像一个仪式——做完了，心安了，然后该怎样还是怎样。",
     "你的自我认知系统装了一个特别贴心的过滤器：只显示对自己有利的部分。你觉得自己挺通透，但「我就是这样的人」和「我没觉得有什么问题」这两句话，你说得比你意识到的频繁多了。"
   ],
-  // 边界感缺失
+  // 边界感模糊
   [
     "你清楚地知道哪里是你的地盘，哪里不是。你活明白了一件事：管好自己已经是全职工作了，哪有那么多精力优化别人的人生。",
     "你大多数时候守得住，但遇到「我真的觉得对方需要听一听」的时候会把持不住。跨过去之前建议先问自己：是对方需要，还是你需要说？",
     "「我是为你好」在你这里是一张无限次使用的通行证。你有没有想过，有时候最好的关心，是什么都不说？"
   ],
-  // 共情缺失
+  // 共情力迟钝
   [
     "你真的在听，不是在等对方说完然后轮到你表演。在一个到处都是「想开点」「成熟一点」的世界里，你是个稀缺物种。",
     "你有共情能力，但有时候会不自觉地用「我的经历」替换「对方的经历」。「我理解，我之前也这样」是善意的——但它悄悄把对话主角从对方换成了你，而且换得天衣无缝。",
@@ -964,10 +988,6 @@ function renderQuestion() {
   document.getElementById('q-dim').textContent = DIMS[q.dim];
   document.getElementById('q-text').textContent = q.text;
 
-  // 进度条
-  const pct = Math.round((runningScore / (current * 7 + 7)) * 100) || 0;
-  updateMeter(pct);
-
   // 打乱选项
   const labels = ['A','B','C','D'];
   const indexed = q.opts.map((text,i)=>({text, score:SCORES[i]}));
@@ -984,11 +1004,6 @@ function renderQuestion() {
   });
 }
 
-function updateMeter(pct) {
-  document.getElementById('meter-fill').style.width = pct+'%';
-  document.getElementById('meter-val').textContent = pct+'%';
-}
-
 // ── 选择选项 ──────────────────────────────────────────
 function selectOpt(el, score, dim) {
   if(answering) return;
@@ -1000,9 +1015,6 @@ function selectOpt(el, score, dim) {
   runningScore += score;
   dimScores[dim] += score;
   answers.push(score);
-
-  const pct = Math.round((runningScore / ((current+1)*7)) * 100);
-  updateMeter(pct);
 
   setTimeout(()=>{
     current++;
@@ -1022,7 +1034,7 @@ const LOADING_STEPS = [
   "校准权力惯性读数…",
   "扫描自我认知盲区…",
   "分析边界感数据…",
-  "比对共情缺失指数…",
+  "比对共情力迟钝指数…",
   "登味儿数据库匹配中…"
 ];
 
@@ -1095,6 +1107,26 @@ function showResult() {
     setTimeout(()=>{
       document.getElementById(`dim-bar-${i}`).style.width = pct+'%';
     }, 200 + i*100);
+  });
+
+  // 等级分布图
+  const mapContainer = document.getElementById('level-map');
+  mapContainer.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const isUser = (lv === level);
+    const el = document.createElement('div');
+    el.className = 'level-map-item' + (isUser ? ' level-map-active' : '');
+    el.innerHTML = `
+      <div class="level-map-bar-wrap">
+        <div class="level-map-bar" style="width:${lv.meterPct}%"></div>
+      </div>
+      <div class="level-map-info">
+        <span class="level-map-title">${lv.title}</span>
+        <span class="level-map-pct">${lv.pct}</span>
+      </div>
+      ${isUser ? '<div class="level-map-you">← 你在这里</div>' : ''}
+    `;
+    mapContainer.appendChild(el);
   });
 
   document.getElementById('screen-result').classList.add('fade-in');
