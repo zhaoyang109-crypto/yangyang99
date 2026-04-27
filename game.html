@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>登了duang啷</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap');
 
@@ -682,6 +684,143 @@ body::after {
   color: var(--green);
 }
 
+.btn-save {
+  background: transparent;
+  border: 1px solid rgba(57,255,20,0.4);
+  color: var(--green);
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  transition: all .2s;
+}
+
+.btn-save:hover {
+  background: rgba(57,255,20,0.08);
+  box-shadow: 0 0 20px rgba(57,255,20,0.2);
+}
+
+/* 分享卡片（隐藏，用于截图）*/
+#share-card {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 375px;
+  background: #0A0A1A;
+  padding: 36px 28px 28px;
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+  color: #fff;
+}
+
+.sc-badge {
+  font-size: 11px;
+  color: rgba(255,110,199,0.7);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.sc-pct {
+  font-size: 52px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FF6EC7, #B44FFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.sc-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.sc-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.sc-divider {
+  height: 1px;
+  background: rgba(255,110,199,0.2);
+  margin-bottom: 24px;
+}
+
+.sc-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sc-cta {
+  flex: 1;
+}
+
+.sc-cta-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.sc-cta-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+}
+
+.sc-qr {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+/* 遮罩 */
+#share-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#share-overlay.show {
+  display: flex;
+}
+
+#share-overlay img {
+  max-width: 320px;
+  border-radius: 16px;
+  box-shadow: 0 0 60px rgba(255,110,199,0.3);
+}
+
+.overlay-tip {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+
+.overlay-close {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+  border-radius: 999px;
+  padding: 8px 24px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .fade-in {
   animation: fadeIn .35s ease;
 }
@@ -785,10 +924,34 @@ for(let i=0;i<30;i++){
 
     <div class="btn-row">
       <button class="btn-share" onclick="shareResult()">分享给朋友 ✦</button>
+      <button class="btn-save" onclick="generateShareImage()">生成分享图 ✦</button>
       <button class="btn-retry" onclick="restartQuiz()">再测一次</button>
     </div>
   </div>
 
+</div>
+
+<!-- 分享卡片（屏幕外，用于截图） -->
+<div id="share-card">
+  <div class="sc-badge">✦ 登味儿自测 2026 ✦</div>
+  <div class="sc-pct" id="sc-pct"></div>
+  <div class="sc-title" id="sc-title"></div>
+  <div class="sc-sub" id="sc-sub"></div>
+  <div class="sc-divider"></div>
+  <div class="sc-bottom">
+    <div class="sc-cta">
+      <div class="sc-cta-title">你的登味儿浓度是多少？</div>
+      <div class="sc-cta-sub">扫码测一测 👉</div>
+    </div>
+    <div class="sc-qr" id="sc-qr"></div>
+  </div>
+</div>
+
+<!-- 预览遮罩 -->
+<div id="share-overlay" onclick="closeOverlay()">
+  <img id="share-preview" src="" alt="分享图">
+  <div class="overlay-tip">长按图片保存到相册</div>
+  <button class="overlay-close" onclick="closeOverlay(event)">关闭</button>
 </div>
 
 <script>
@@ -1156,6 +1319,63 @@ function shareResult() {
 
 function restartQuiz() {
   show('screen-cover');
+}
+
+// ── 生成分享图 ──────────────────────────────────────────
+function generateShareImage() {
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '生成中…';
+  btn.disabled = true;
+
+  // 填充卡片内容
+  const title = document.getElementById('result-title').textContent;
+  const pct   = document.getElementById('result-pct').textContent;
+  const sub   = document.getElementById('result-subtitle').textContent;
+
+  document.getElementById('sc-pct').textContent   = pct;
+  document.getElementById('sc-title').textContent = title;
+  document.getElementById('sc-sub').textContent   = sub;
+
+  // 生成二维码
+  const qrEl = document.getElementById('sc-qr');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, {
+    text: 'https://zhaoyang109-crypto.github.io/yangyang99/game.html',
+    width: 72,
+    height: 72,
+    colorDark: '#0A0A1A',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // 等二维码渲染完再截图
+  setTimeout(() => {
+    const card = document.getElementById('share-card');
+    card.style.left = '-9999px';
+
+    html2canvas(card, {
+      backgroundColor: '#0A0A1A',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    }).then(canvas => {
+      const img = document.getElementById('share-preview');
+      img.src = canvas.toDataURL('image/png');
+      document.getElementById('share-overlay').classList.add('show');
+
+      btn.textContent = '生成分享图 ✦';
+      btn.disabled = false;
+    }).catch(() => {
+      btn.textContent = '生成分享图 ✦';
+      btn.disabled = false;
+      alert('生成失败，请截图保存 📸');
+    });
+  }, 300);
+}
+
+function closeOverlay(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('share-overlay').classList.remove('show');
 }
 </script>
 </body>
