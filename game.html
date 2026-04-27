@@ -481,7 +481,7 @@ body::after {
   margin-bottom: 24px;
 }
 
-/* 等级分布图 */
+/* 等级分布图（金字塔）*/
 .level-map-section {
   margin-bottom: 32px;
 }
@@ -489,62 +489,56 @@ body::after {
 .level-map {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  gap: 7px;
   margin-top: 16px;
 }
 
 .level-map-item {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
   transition: all .3s;
 }
 
+.level-map-item:nth-child(1) { width: 44%; }
+.level-map-item:nth-child(2) { width: 52%; }
+.level-map-item:nth-child(3) { width: 60%; }
+.level-map-item:nth-child(4) { width: 68%; }
+.level-map-item:nth-child(5) { width: 76%; }
+.level-map-item:nth-child(6) { width: 84%; }
+.level-map-item:nth-child(7) { width: 92%; }
+.level-map-item:nth-child(8) { width: 100%; }
+
 .level-map-active {
-  background: rgba(255,110,199,0.12);
-  border-color: rgba(255,110,199,0.6);
-  box-shadow: 0 0 20px rgba(255,110,199,0.15);
-}
-
-.level-map-bar-wrap {
-  background: rgba(255,255,255,0.06);
-  border-radius: 999px;
-  height: 6px;
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-
-.level-map-bar {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), var(--pink), var(--purple));
-}
-
-.level-map-active .level-map-bar {
-  background: linear-gradient(90deg, var(--pink), var(--purple));
-  box-shadow: 0 0 8px rgba(255,110,199,0.5);
-}
-
-.level-map-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: rgba(255,110,199,0.15);
+  border-color: var(--pink);
+  box-shadow: 0 0 20px rgba(255,110,199,0.25);
 }
 
 .level-map-title {
   font-size: 14px;
   font-weight: 700;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.75);
 }
 
 .level-map-active .level-map-title {
-  color: var(--pink);
+  color: #fff;
+}
+
+.level-map-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .level-map-pct {
-  font-size: 12px;
-  color: rgba(255,255,255,0.3);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
   font-weight: 600;
 }
 
@@ -553,11 +547,14 @@ body::after {
 }
 
 .level-map-you {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--pink);
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 1px;
+  color: var(--pink);
+  background: rgba(255,110,199,0.15);
+  border: 1px solid rgba(255,110,199,0.4);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 
 /* 维度分析 */
@@ -1107,22 +1104,19 @@ function showResult() {
     }, 200 + i*100);
   });
 
-  // 等级分布图
+  // 等级分布图（金字塔，从高到低）
   const mapContainer = document.getElementById('level-map');
   mapContainer.innerHTML = '';
-  LEVELS.forEach((lv, i) => {
+  [...LEVELS].reverse().forEach((lv) => {
     const isUser = (lv === level);
     const el = document.createElement('div');
     el.className = 'level-map-item' + (isUser ? ' level-map-active' : '');
     el.innerHTML = `
-      <div class="level-map-bar-wrap">
-        <div class="level-map-bar" style="width:${lv.meterPct}%"></div>
+      <span class="level-map-title">${lv.title}</span>
+      <div class="level-map-right">
+        <span class="level-map-pct">登味 ${lv.pct}</span>
+        ${isUser ? '<span class="level-map-you">你在这里</span>' : ''}
       </div>
-      <div class="level-map-info">
-        <span class="level-map-title">${lv.title}</span>
-        <span class="level-map-pct">${lv.pct}</span>
-      </div>
-      ${isUser ? '<div class="level-map-you">← 你在这里</div>' : ''}
     `;
     mapContainer.appendChild(el);
   });
