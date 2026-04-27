@@ -584,15 +584,27 @@ body::after {
 }
 
 .dim-name {
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  width: 80px;
+  width: 110px;
   flex-shrink: 0;
-  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.dim-name-main {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.dim-name-suffix {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+  margin-left: 1px;
 }
 
 .dim-bar-track {
-  flex: 1;
+  width: 80px;
+  flex-shrink: 0;
   background: rgba(255,255,255,0.05);
   border-radius: 999px;
   height: 8px;
@@ -1089,7 +1101,9 @@ function showResult() {
     const el = document.createElement('div');
     el.innerHTML = `
       <div class="dim-item">
-        <div class="dim-name">${name}</div>
+        <div class="dim-name">
+          <span class="dim-name-main" style="color:${color}">${name.replace('指数','')}</span><span class="dim-name-suffix">指数</span>
+        </div>
         <div class="dim-bar-track">
           <div class="dim-bar-fill" id="dim-bar-${i}" style="background:${color}"></div>
         </div>
