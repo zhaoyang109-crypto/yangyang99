@@ -734,7 +734,6 @@ for(let i=0;i<30;i++){
   <div id="screen-quiz">
     <div class="quiz-header">
       <div class="q-counter" id="q-counter">01 / 15</div>
-      <div class="q-dim" id="q-dim"></div>
     </div>
 
     <div class="q-text" id="q-text"></div>
@@ -985,7 +984,6 @@ function renderQuestion() {
   const n = current+1;
 
   document.getElementById('q-counter').textContent = `${String(n).padStart(2,'0')} / 15`;
-  document.getElementById('q-dim').textContent = DIMS[q.dim];
   document.getElementById('q-text').textContent = q.text;
 
   // 打乱选项
