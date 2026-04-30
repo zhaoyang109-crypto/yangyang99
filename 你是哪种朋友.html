@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你是哪种朋友</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap');
+
+:root {
+  --pink: #FF6EC7;
+  --green: #39FF14;
+  --purple: #B44FFF;
+  --blue: #00D4FF;
+  --yellow: #FFD60A;
+  --dark: #0A0A1A;
+  --darker: #060610;
+  --border-pink: rgba(255,110,199,0.4);
+  --border-blue: rgba(0,212,255,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Space Grotesk', 'PingFang SC', sans-serif;
+  background: var(--darker);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,212,255,0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-orb {
+  position: fixed;
+  bottom: -150px; right: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(180,79,255,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: fixed;
+  width: 3px; height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle var(--d, 3s) var(--delay, 0s) infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes twinkle {
+  0%,100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.5; transform: scale(1); }
+}
+
+.card {
+  background: rgba(10,10,26,0.95);
+  border: 1px solid var(--border-blue);
+  border-radius: 24px;
+  padding: 40px 36px;
+  max-width: 580px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 0 40px rgba(0,212,255,0.08),
+    0 0 80px rgba(180,79,255,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--purple), var(--pink));
+  border-radius: 24px 24px 0 0;
+}
+
+/* ── 封面 ── */
+#screen-cover { text-align: center; }
+
+.cover-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(180,79,255,0.15));
+  border: 1px solid var(--border-blue);
+  color: var(--blue);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.cover-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--blue), var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+}
+
+.cover-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.disclaimer {
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.7;
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.disclaimer strong { color: var(--blue); font-weight: 700; }
+
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.level-chip {
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.level-chip .name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.level-chip .pct {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+}
+
+.level-chip.special {
+  border-color: rgba(180,79,255,0.4);
+  grid-column: span 2;
+}
+
+.level-chip.special .name { color: var(--purple); }
+
+/* ── 按钮 ── */
+.btn-start {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 18px 56px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 0 30px rgba(0,212,255,0.25), 0 0 60px rgba(0,212,255,0.1);
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.btn-start::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left .4s;
+}
+
+.btn-start:hover::before { left: 100%; }
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(0,212,255,0.5), 0 0 80px rgba(0,212,255,0.2);
+}
+.btn-start:active { transform: translateY(0); }
+
+/* ── 答题 ── */
+#screen-quiz { display: none; }
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.q-counter {
+  font-size: 22px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.q-dim {
+  font-size: 11px;
+  color: var(--blue);
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.q-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  min-height: 60px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opt {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.15);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+  transition: all .18s;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.opt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(180,79,255,0.08));
+  opacity: 0;
+  transition: opacity .18s;
+}
+
+.opt:hover {
+  border-color: var(--blue);
+  color: #fff;
+  transform: translateX(4px);
+  box-shadow: 0 0 20px rgba(0,212,255,0.1);
+}
+
+.opt:hover::before { opacity: 1; }
+
+.opt.selected {
+  border-color: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0,212,255,0.15), inset 0 0 20px rgba(0,212,255,0.05);
+}
+
+.opt.selected::before { opacity: 1; }
+
+.opt-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--blue);
+  flex-shrink: 0;
+  width: 22px;
+  margin-top: 1px;
+}
+
+/* ── 加载 ── */
+#screen-loading {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.loading-title {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--blue), var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 32px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.97); }
+}
+
+.loading-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.loading-step {
+  font-size: 14px;
+  color: rgba(255,255,255,0.25);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: color .3s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-step.active { color: var(--blue); }
+.loading-step.done { color: rgba(255,255,255,0.4); }
+
+.step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  transition: background .3s;
+}
+
+.loading-step.active .step-dot {
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+  animation: blink .6s infinite;
+}
+
+.loading-step.done .step-dot { background: rgba(255,255,255,0.3); }
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.duang-text {
+  font-size: 64px;
+  font-weight: 900;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all .4s cubic-bezier(.34,1.56,.64,1);
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.duang-text.show { opacity: 1; transform: scale(1); }
+
+/* ── 结果 ── */
+#screen-result { display: none; }
+
+.result-header { text-align: center; margin-bottom: 28px; }
+
+.result-emoji {
+  font-size: 52px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.result-index-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.result-pct {
+  font-size: 56px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--blue), var(--purple), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.result-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.result-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1px;
+}
+
+.result-meter { margin-bottom: 28px; }
+
+.result-meter-track {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 999px;
+  height: 16px;
+  overflow: hidden;
+}
+
+.result-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--purple), var(--pink));
+  width: 0%;
+  transition: width 1.4s cubic-bezier(.22,1,.36,1);
+  position: relative;
+}
+
+.result-meter-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0;
+  width: 12px; height: 100%;
+  background: rgba(255,255,255,0.7);
+  border-radius: 999px;
+  filter: blur(3px);
+}
+
+.result-desc {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 16px;
+  padding: 20px 22px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* 等级分布图 */
+.level-map-section { margin-bottom: 32px; }
+
+.level-map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.level-map-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  transition: all .3s;
+}
+
+.level-map-item:nth-child(1) { width: 44%; }
+.level-map-item:nth-child(2) { width: 52%; }
+.level-map-item:nth-child(3) { width: 60%; }
+.level-map-item:nth-child(4) { width: 68%; }
+.level-map-item:nth-child(5) { width: 76%; }
+.level-map-item:nth-child(6) { width: 84%; }
+.level-map-item:nth-child(7) { width: 92%; }
+.level-map-item:nth-child(8) { width: 100%; }
+
+.level-map-active {
+  background: rgba(0,212,255,0.12);
+  border-color: var(--blue);
+  box-shadow: 0 0 20px rgba(0,212,255,0.2);
+}
+
+.level-map-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.75);
+}
+
+.level-map-active .level-map-title { color: #fff; }
+
+.level-map-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-map-pct {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 600;
+}
+
+.level-map-active .level-map-pct { color: var(--blue); }
+
+.level-map-you {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--blue);
+  background: rgba(0,212,255,0.15);
+  border: 1px solid rgba(0,212,255,0.4);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* 维度分析 */
+.dim-section { margin-bottom: 24px; }
+
+.dim-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--blue);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.dim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dim-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dim-name {
+  width: 110px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.dim-name-main { font-size: 15px; font-weight: 800; }
+
+.dim-name-suffix {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+  margin-left: 1px;
+}
+
+.dim-bar-track {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.05);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: 0%;
+  transition: width 1s cubic-bezier(.22,1,.36,1);
+}
+
+.dim-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.dim-analysis {
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.7;
+  margin-top: 6px;
+}
+
+/* 底部按钮 */
+.btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.btn-share {
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  box-shadow: 0 0 30px rgba(0,212,255,0.2);
+  transition: all .2s;
+}
+
+.btn-share:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px rgba(0,212,255,0.4);
+}
+
+.btn-save {
+  background: transparent;
+  border: 1px solid rgba(57,255,20,0.4);
+  color: var(--green);
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  transition: all .2s;
+}
+
+.btn-save:hover {
+  background: rgba(57,255,20,0.08);
+  box-shadow: 0 0 20px rgba(57,255,20,0.2);
+}
+
+.btn-retry {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .2s;
+}
+
+.btn-retry:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+/* 分享卡片 */
+#share-card {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 375px;
+  background: #0A0A1A;
+  padding: 36px 28px 28px;
+  font-family: -apple-system, 'PingFang SC', sans-serif;
+  color: #fff;
+}
+
+.sc-badge {
+  font-size: 11px;
+  color: rgba(0,212,255,0.7);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.sc-emoji {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.sc-pct {
+  font-size: 52px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00D4FF, #B44FFF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.sc-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.sc-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.sc-divider {
+  height: 1px;
+  background: rgba(0,212,255,0.2);
+  margin-bottom: 24px;
+}
+
+.sc-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sc-cta { flex: 1; }
+
+.sc-cta-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.sc-cta-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+}
+
+.sc-qr {
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+/* 遮罩 */
+#share-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#share-overlay.show { display: flex; }
+
+#share-overlay img {
+  max-width: 320px;
+  border-radius: 16px;
+  box-shadow: 0 0 60px rgba(0,212,255,0.3);
+}
+
+.overlay-tip {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+
+.overlay-close {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+  border-radius: 999px;
+  padding: 8px 24px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fade-in { animation: fadeIn .35s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+<script>
+for(let i=0;i<30;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.cssText=`left:${Math.random()*100}vw;top:${Math.random()*100}vh;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s`;
+  document.body.appendChild(s);
+}
+</script>
+
+<div class="card" id="main-card">
+
+  <!-- ── 封面 ── -->
+  <div id="screen-cover">
+    <div class="cover-badge">✦ 朋友类型测试 2026 ✦</div>
+    <div class="cover-title">你是哪种朋友</div>
+    <div class="cover-sub">15道题，测出你在朋友圈里的真实人设<br>以及你到底是哪种朋友</div>
+
+    <div class="disclaimer">
+      <strong>免责声明：</strong>本测试结果仅供娱乐参考，不构成任何友情诊断或人格鉴定。测出来很好看不代表你真的是好朋友，测出来难看也不代表你没救了。如结果引发不适，请先想想上次你是什么时候主动联系朋友的。
+    </div>
+
+    <div class="level-grid">
+      <div class="level-chip"><span class="name">人间蒸发款</span><span class="pct">消失是一种生活方式</span></div>
+      <div class="level-chip"><span class="name">工具人款</span><span class="pct">有事才出现</span></div>
+      <div class="level-chip"><span class="name">情绪垃圾桶款</span><span class="pct">只会倒苦水</span></div>
+      <div class="level-chip"><span class="name">表面朋友款</span><span class="pct">见面才想起来</span></div>
+      <div class="level-chip"><span class="name">还不错款</span><span class="pct">偶尔靠谱</span></div>
+      <div class="level-chip"><span class="name">真朋友款</span><span class="pct">可以托付的那种</span></div>
+      <div class="level-chip"><span class="name">人形充电宝款</span><span class="pct">给人能量的存在</span></div>
+      <div class="level-chip special"><span class="name">神经病款</span><span class="pct">朋友圈里的稀有动物，珍贵到不真实</span></div>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">开始测试 ✦</button>
+    <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.2);text-align:center;">共15题 · 约8-10分钟</div>
+  </div>
+
+  <!-- ── 答题 ── -->
+  <div id="screen-quiz">
+    <div class="quiz-header">
+      <div class="q-counter" id="q-counter">01 / 15</div>
+      <div class="q-dim" id="q-dim"></div>
+    </div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <!-- ── 加载 ── -->
+  <div id="screen-loading">
+    <div class="loading-title">分析中...</div>
+    <div class="loading-steps" id="loading-steps"></div>
+    <div class="duang-text" id="duang-text">duang！</div>
+  </div>
+
+  <!-- ── 结果 ── -->
+  <div id="screen-result">
+    <div class="result-header">
+      <span class="result-emoji" id="result-emoji"></span>
+      <div class="result-index-label">你的朋友类型</div>
+      <div class="result-pct" id="result-pct"></div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-subtitle" id="result-subtitle"></div>
+    </div>
+
+    <div class="result-meter">
+      <div class="result-meter-track">
+        <div class="result-meter-fill" id="result-meter-fill"></div>
+      </div>
+    </div>
+
+    <div class="result-desc" id="result-desc"></div>
+
+    <div class="level-map-section">
+      <div class="dim-title">✦ 你在朋友圈的段位</div>
+      <div class="level-map" id="level-map"></div>
+    </div>
+
+    <div class="dim-section">
+      <div class="dim-title">✦ 你的朋友力成分分析</div>
+      <div class="dim-list" id="dim-list"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-share" onclick="shareResult()">分享给朋友 ✦</button>
+      <button class="btn-save" onclick="generateShareImage()">生成分享图 ✦</button>
+      <button class="btn-retry" onclick="restartQuiz()">再测一次</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 分享卡片 -->
+<div id="share-card">
+  <div class="sc-badge">✦ 朋友类型测试 2026 ✦</div>
+  <span class="sc-emoji" id="sc-emoji"></span>
+  <div class="sc-pct" id="sc-pct"></div>
+  <div class="sc-title" id="sc-title"></div>
+  <div class="sc-sub" id="sc-sub"></div>
+  <div class="sc-divider"></div>
+  <div class="sc-bottom">
+    <div class="sc-cta">
+      <div class="sc-cta-title">你是哪种朋友？</div>
+      <div class="sc-cta-sub">扫码测一测 👉</div>
+    </div>
+    <div class="sc-qr" id="sc-qr"></div>
+  </div>
+</div>
+
+<!-- 预览遮罩 -->
+<div id="share-overlay" onclick="closeOverlay()">
+  <img id="share-preview" src="" alt="分享图">
+  <div class="overlay-tip">长按图片保存到相册</div>
+  <button class="overlay-close" onclick="closeOverlay(event)">关闭</button>
+</div>
+
+<script>
+// ── 维度定义 ──────────────────────────────────────────
+const DIMS = ["在场感指数","情绪容量指数","主动性指数","边界感指数","记忆力指数"];
+const DIM_COLORS = ["#00D4FF","#FF6EC7","#39FF14","#B44FFF","#FFD60A"];
+const DIM_LABELS = ["在场感","情绪容量","主动性","边界感","记忆力"];
+
+// ── 题目（每维度3题，共15题，选项顺序对应分值1/3/5/7）──
+const QUESTIONS = [
+  // 维度0：在场感
+  {dim:0, dimName:"在场感", text:"朋友发来一条「我今天好难受」，你当时在刷手机，你会？", opts:[
+    "立刻回「怎么了？」然后认真听",
+    "回个「怎么了」然后等他说",
+    "发个抱抱表情，等他自己说",
+    "看到了，等会儿再回（然后忘了）"
+  ]},
+  {dim:0, dimName:"在场感", text:"朋友生日你通常会？", opts:[
+    "提前记好，当天第一个发消息",
+    "朋友圈提醒了才想起来，赶紧补发",
+    "当天见到才说，没见到就算了",
+    "事后才想起，发条「迟到的生日快乐」"
+  ]},
+  {dim:0, dimName:"在场感", text:"朋友说「最近想找你聊聊」，你会？", opts:[
+    "马上问「现在有空吗」",
+    "「好啊，这周都行」然后等他定",
+    "「好啊」，然后各自忙，没有下文",
+    "回了个「好的」，然后这件事就消失了"
+  ]},
+  // 维度1：情绪容量
+  {dim:1, dimName:"情绪容量", text:"朋友半夜发消息说睡不着、心情很差，你会？", opts:[
+    "打电话过去，陪他说话",
+    "认真回消息，问他发生什么了",
+    "发几条安慰的话，说「会好的」",
+    "回「早点睡，明天会好一点的」"
+  ]},
+  {dim:1, dimName:"情绪容量", text:"朋友跟你倒苦水，说了很久，你心里在想？", opts:[
+    "认真在听，想帮他理清楚",
+    "在听，但也在想怎么帮他解决",
+    "在听，但有点不知道说什么好",
+    "在听，同时在想今晚吃什么"
+  ]},
+  {dim:1, dimName:"情绪容量", text:"朋友哭了，你的第一反应是？", opts:[
+    "递纸巾，什么都不说，先陪着",
+    "问「怎么了，说说看」",
+    "说「别哭了，没事的」",
+    "有点手足无措，说「你还好吗」"
+  ]},
+  // 维度2：主动性
+  {dim:2, dimName:"主动性", text:"上次主动联系朋友是什么时候？", opts:[
+    "最近几天，我经常主动",
+    "上周，偶尔会主动",
+    "上个月？记不太清了",
+    "等等，我需要想一下……"
+  ]},
+  {dim:2, dimName:"主动性", text:"朋友朋友圈发了一张看起来心情不好的照片，你会？", opts:[
+    "私信问他「还好吗」",
+    "点个赞，表示我看到了",
+    "看看就过去了",
+    "什么都没做，继续刷"
+  ]},
+  {dim:2, dimName:"主动性", text:"你们已经两个月没联系了，你会？", opts:[
+    "主动发消息说「好久不见，最近怎样」",
+    "想发，但觉得突然，等个时机",
+    "等他来找我",
+    "两个月了吗？没感觉"
+  ]},
+  // 维度3：边界感
+  {dim:3, dimName:"边界感", text:"朋友跟你说了一个秘密，另一个共同朋友问起，你会？", opts:[
+    "直接说「这个我不方便说」",
+    "含糊带过，不正面回答",
+    "说「你去问他本人吧」",
+    "看情况，关系好的话可能会说"
+  ]},
+  {dim:3, dimName:"边界感", text:"朋友借了你钱，到期没还，你会？", opts:[
+    "直接提醒，不觉得尴尬",
+    "找个自然的时机提一下",
+    "等他主动，不好意思开口",
+    "算了，当没这回事"
+  ]},
+  {dim:3, dimName:"边界感", text:"朋友让你帮一个忙，但你真的没时间，你会？", opts:[
+    "直接说「这次真的不行，下次」",
+    "解释一下原因，然后拒绝",
+    "硬撑着答应，然后很痛苦",
+    "答应了，然后拖到最后关头"
+  ]},
+  // 维度4：记忆力
+  {dim:4, dimName:"记忆力", text:"朋友上次跟你说的烦心事，你还记得吗？", opts:[
+    "记得，而且会主动问后来怎样了",
+    "大概记得，但没有主动问",
+    "有点印象，但细节忘了",
+    "什么烦心事？"
+  ]},
+  {dim:4, dimName:"记忆力", text:"朋友说过他不喜欢吃香菜，下次一起点餐你会？", opts:[
+    "自动帮他备注去香菜",
+    "想起来了，提醒他自己说",
+    "忘了，点完才想起来",
+    "从来没记住过这种事"
+  ]},
+  {dim:4, dimName:"记忆力", text:"朋友提到他最近在准备一件重要的事，你会？", opts:[
+    "记在心里，到时候主动问结果",
+    "当时关心了，后来忘了问",
+    "听的时候在，听完就忘了",
+    "他说过这件事吗？"
+  ]}
+];
+
+const SCORES = [1, 3, 5, 7];
+
+// ── 等级（总分15-105，8档）──
+const LEVELS = [
+  {
+    min:85, max:105,
+    emoji:"🧠",
+    pct:"神经病级",
+    title:"神经病款",
+    sub:"朋友圈里的稀有动物，珍贵到不真实",
+    desc:"你是这个测试里的异类。你记得朋友说过的每一件小事，你会在他们难受的时候第一个出现，你主动、在场、有边界、有情绪容量——你是那种让人觉得「有你真好」的朋友。我们的系统反复检测了三次，确认你不是在骗题。如果你真的是这样的人，请好好保护自己，因为这个世界上的人大多数不值得你这样对待。",
+    meterPct: 99
+  },
+  {
+    min:70, max:84,
+    emoji:"🔋",
+    pct:"充电宝级",
+    title:"人形充电宝款",
+    sub:"给人能量的存在，但记得给自己充电",
+    desc:"你是那种让人充完电就走的朋友——不是说别人利用你，而是你真的有能量给出去。你在场、主动、记得住事情，朋友们知道找你不会扑空。唯一的问题是：你有没有想过，谁在给你充电？你的情绪容量是有限的，别把自己耗干了。",
+    meterPct: 84
+  },
+  {
+    min:55, max:69,
+    emoji:"🤝",
+    pct:"真朋友级",
+    title:"真朋友款",
+    sub:"可以托付的那种，不多见",
+    desc:"你是那种关键时刻会出现的朋友。不是每件小事都在，但真正重要的时候你不会缺席。你有边界感，不会无限透支自己，也不会让朋友觉得你不在乎。这个段位已经超过了大多数人——很多人以为自己是真朋友，其实只是表面朋友。",
+    meterPct: 68
+  },
+  {
+    min:42, max:54,
+    emoji:"😐",
+    pct:"还不错级",
+    title:"还不错款",
+    sub:"偶尔靠谱，偶尔消失，总体无功无过",
+    desc:"你是那种「还不错」的朋友——不会让人失望，但也不会让人特别感动。你有时候很在场，有时候又消失得无影无踪。你记得住一些事，忘掉另一些事。你的朋友们对你的评价大概是「挺好的，就是有时候联系不上」。这个评价不算差，但你知道自己可以做得更好。",
+    meterPct: 50
+  },
+  {
+    min:32, max:41,
+    emoji:"🪟",
+    pct:"表面朋友级",
+    title:"表面朋友款",
+    sub:"见面才想起来，不见就忘了",
+    desc:"你的友情是「见面激活型」的——见到了很开心，聊得很好，然后各自回家，然后消失三个月。你不是坏人，你只是不太擅长维护关系。你的朋友们知道你不是故意的，但「不是故意的」和「有在用心」是两件事。",
+    meterPct: 35
+  },
+  {
+    min:24, max:31,
+    emoji:"🗑️",
+    pct:"垃圾桶级",
+    title:"情绪垃圾桶款",
+    sub:"只会倒苦水，不太会接别人的",
+    desc:"你的友情是单向的——你需要朋友的时候他们在，但朋友需要你的时候你不一定在。不是因为你坏，而是因为你的情绪容量已经被自己的事情占满了，没有多余的空间装别人的情绪。你的朋友们爱你，但有时候会觉得有点累。",
+    meterPct: 22
+  },
+  {
+    min:18, max:23,
+    emoji:"🔧",
+    pct:"工具人级",
+    title:"工具人款",
+    sub:"有事才出现，没事人间蒸发",
+    desc:"你的友情是「功能性」的——需要帮忙的时候出现，不需要的时候消失。你不是故意的，你只是太忙了，或者太懒了，或者两者都有。你的朋友们知道找你有用，但不会找你聊心里话，因为他们知道你不太擅长那个。",
+    meterPct: 12
+  },
+  {
+    min:15, max:17,
+    emoji:"👻",
+    pct:"蒸发级",
+    title:"人间蒸发款",
+    sub:"消失是一种生活方式",
+    desc:"你是那种让人发消息要等三天的朋友。不是因为你忙，而是因为你的手机和你的社交意愿之间存在一道神秘的屏障。你的朋友们已经习惯了你的消失，他们不怪你，只是慢慢地，联系越来越少了。你知道吗？",
+    meterPct: 3
+  }
+];
+
+// ── 维度分析文案（每维度3档：低/中/高）──
+const DIM_ANALYSIS = [
+  // 在场感
+  [
+    "你的在场感很强。朋友发消息你会回，朋友生日你记得，朋友说想聊你会约。这听起来很基础，但你知道吗，能做到这三件事的人已经超过了大多数人。",
+    "你的在场感时好时坏。状态好的时候你很在场，状态差的时候你会消失一段时间。你的朋友们已经摸清了你的规律，他们接受你，但偶尔会希望你更稳定一点。",
+    "你的在场感基本为零。不是说你不关心朋友，而是你的关心停留在心里，没有转化成行动。「我有想到他」和「我有联系他」是两件事，你经常混淆这两件事。"
+  ],
+  // 情绪容量
+  [
+    "你的情绪容量很大。朋友难受的时候你能接住，不会急着解决问题，不会说「想开点」，你只是在那里。这种能力比你想象的稀缺，很多人一辈子都找不到一个这样的朋友。",
+    "你有情绪容量，但有时候会不自觉地切换到「解决问题模式」。朋友倒苦水，你开始分析原因、给建议——出发点是好的，但有时候对方只是想被听见，不是想被解决。",
+    "你的情绪容量比较有限。不是你不关心，而是别人的情绪让你不知道怎么反应，所以你会说「没事的」「想开点」「会好的」——这些话没有错，但它们的意思是「我不太知道怎么陪你」。"
+  ],
+  // 主动性
+  [
+    "你很主动。你不会等朋友来找你，你会主动联系，主动关心，主动问「最近怎样」。在一个大家都很忙、都在等对方先开口的世界里，你是那个先开口的人。",
+    "你偶尔主动，但不稳定。你有主动的意愿，但执行力时好时坏。你想过很多次要联系某个朋友，但最后没有发出去。那条没发出去的消息，对方永远不会知道。",
+    "你基本不主动。不是因为你不在乎，而是你觉得「如果他想找我他会来找我」。这个逻辑没有错，但友情是需要双向维护的，如果两个人都在等对方先开口，那就什么都不会发生。"
+  ],
+  // 边界感
+  [
+    "你的边界感很清晰。你知道什么可以说，什么不可以说；你知道什么忙可以帮，什么忙帮不了。你不会因为「不好意思」就答应自己做不到的事，这让你的朋友知道你说「可以」的时候是真的可以。",
+    "你的边界感时清晰时模糊。你知道自己的边界在哪里，但执行的时候会软化——因为不好意思，因为怕朋友失望，因为觉得「这次就算了」。结果是你答应了一些自己不想答应的事，然后默默消化那个不舒服。",
+    "你的边界感比较弱。你很难拒绝朋友，很难说「这件事我不方便」，很难在关系里保护自己。你以为这是对朋友好，但长期来看，一个没有边界的人会越来越累，然后突然消失。"
+  ],
+  // 记忆力
+  [
+    "你记得住朋友说过的事。不只是大事，连小事你也记得——他不喜欢吃什么，他在准备什么，他上次说的烦心事后来怎样了。这种记忆力不是天生的，是因为你真的在乎。",
+    "你记得住重要的事，但细节会忘。你不是不在乎，只是信息量太大，大脑自动过滤了一些。你的朋友们不会怪你，但偶尔会有一点点失落——「他好像没有很认真地听我说话」。",
+    "你的朋友记忆力堪忧。不是说你记性差，而是你在听朋友说话的时候，有一部分注意力在别的地方。结果是你记住了大概，忘掉了细节，然后在朋友提起的时候说「啊对对对」——但你们都知道你不记得了。"
+  ]
+];
+
+// ── 状态 ──────────────────────────────────────────────
+let current = 0;
+let answers = [];
+let dimScores = [0,0,0,0,0];
+let totalScore = 0;
+let answering = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function show(id) {
+  ['screen-cover','screen-quiz','screen-loading','screen-result'].forEach(s=>{
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+}
+
+// ── 开始 ──────────────────────────────────────────────
+function startQuiz() {
+  current=0; answers=[]; dimScores=[0,0,0,0,0]; totalScore=0;
+  show('screen-quiz');
+  renderQuestion();
+}
+
+// ── 渲染题目 ──────────────────────────────────────────
+function renderQuestion() {
+  answering = false;
+  const q = QUESTIONS[current];
+  const n = current + 1;
+
+  document.getElementById('q-counter').textContent = `${String(n).padStart(2,'0')} / 15`;
+  document.getElementById('q-dim').textContent = q.dimName;
+  document.getElementById('q-text').textContent = q.text;
+
+  const labels = ['A','B','C','D'];
+  const indexed = q.opts.map((text,i)=>({text, score:SCORES[i]}));
+  const shuffled = shuffle(indexed);
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  shuffled.forEach((opt,i)=>{
+    const el = document.createElement('div');
+    el.className = 'opt fade-in';
+    el.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${opt.text}</span>`;
+    el.onclick = ()=>selectOpt(el, opt.score, q.dim);
+    container.appendChild(el);
+  });
+}
+
+// ── 选择选项 ──────────────────────────────────────────
+function selectOpt(el, score, dim) {
+  if(answering) return;
+  answering = true;
+
+  document.querySelectorAll('.opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+
+  dimScores[dim] += score;
+  answers.push(score);
+
+  setTimeout(()=>{
+    current++;
+    if(current < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      totalScore = answers.reduce((a,b)=>a+b,0);
+      showLoading();
+    }
+  }, 380);
+}
+
+// ── 加载动画 ──────────────────────────────────────────
+const LOADING_STEPS = [
+  "正在提取朋友力样本…",
+  "检测在场感浓度…",
+  "校准情绪容量读数…",
+  "扫描主动性数据…",
+  "分析边界感指数…",
+  "比对朋友记忆力…",
+  "朋友类型数据库匹配中…"
+];
+
+function showLoading() {
+  show('screen-loading');
+  const container = document.getElementById('loading-steps');
+  container.innerHTML = LOADING_STEPS.map((s,i)=>
+    `<div class="loading-step" id="step-${i}"><div class="step-dot"></div>${s}</div>`
+  ).join('');
+
+  let i=0;
+  const interval = setInterval(()=>{
+    if(i>0){
+      document.getElementById(`step-${i-1}`).classList.remove('active');
+      document.getElementById(`step-${i-1}`).classList.add('done');
+    }
+    if(i<LOADING_STEPS.length){
+      document.getElementById(`step-${i}`).classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+      setTimeout(()=>{
+        document.getElementById('duang-text').classList.add('show');
+        setTimeout(showResult, 800);
+      }, 300);
+    }
+  }, 350);
+}
+
+// ── 结果 ──────────────────────────────────────────────
+function showResult() {
+  show('screen-result');
+
+  const level = LEVELS.find(l=>totalScore>=l.min&&totalScore<=l.max) || LEVELS[LEVELS.length-1];
+
+  document.getElementById('result-emoji').textContent = level.emoji;
+  document.getElementById('result-pct').textContent = level.pct;
+  document.getElementById('result-title').textContent = level.title;
+  document.getElementById('result-subtitle').textContent = level.sub;
+  document.getElementById('result-desc').textContent = level.desc;
+
+  setTimeout(()=>{
+    document.getElementById('result-meter-fill').style.width = level.meterPct+'%';
+  }, 100);
+
+  // 维度分析
+  const dimContainer = document.getElementById('dim-list');
+  dimContainer.innerHTML = '';
+  DIMS.forEach((name,i)=>{
+    const score = dimScores[i];
+    const pct = Math.round((score/21)*100);
+    const tier = score<=9 ? 0 : score<=14 ? 1 : 2;
+    const color = DIM_COLORS[i];
+
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div class="dim-item">
+        <div class="dim-name">
+          <span class="dim-name-main" style="color:${color}">${DIM_LABELS[i]}</span><span class="dim-name-suffix">指数</span>
+        </div>
+        <div class="dim-bar-track">
+          <div class="dim-bar-fill" id="dim-bar-${i}" style="background:${color}"></div>
+        </div>
+        <div class="dim-score">${score}/21</div>
+      </div>
+      <div class="dim-analysis" style="border-color:${color}">${DIM_ANALYSIS[i][tier]}</div>
+    `;
+    dimContainer.appendChild(el);
+    setTimeout(()=>{
+      document.getElementById(`dim-bar-${i}`).style.width = pct+'%';
+    }, 200 + i*100);
+  });
+
+  // 等级分布图（从高到低）
+  const mapContainer = document.getElementById('level-map');
+  mapContainer.innerHTML = '';
+  [...LEVELS].reverse().forEach(lv=>{
+    const isUser = (lv === level);
+    const el = document.createElement('div');
+    el.className = 'level-map-item' + (isUser ? ' level-map-active' : '');
+    el.innerHTML = `
+      <span class="level-map-title">${lv.emoji} ${lv.title}</span>
+      <div class="level-map-right">
+        <span class="level-map-pct">${lv.pct}</span>
+        ${isUser ? '<span class="level-map-you">你在这里</span>' : ''}
+      </div>
+    `;
+    mapContainer.appendChild(el);
+  });
+
+  document.getElementById('screen-result').classList.add('fade-in');
+}
+
+// ── 分享 ──────────────────────────────────────────────
+function shareResult() {
+  const title = document.getElementById('result-title').textContent;
+  const pct = document.getElementById('result-pct').textContent;
+  const text = `我测出来是「${title}」！朋友力等级：${pct}\n快来测测你是哪种朋友 👉 你是哪种朋友`;
+  if(navigator.share){
+    navigator.share({title:'你是哪种朋友', text, url:window.location.href}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>{
+      alert('已复制到剪贴板，快去分享给朋友！✦');
+    }).catch(()=>{
+      alert('截图分享更方便哦 📸');
+    });
+  }
+}
+
+function restartQuiz() {
+  show('screen-cover');
+}
+
+// ── 生成分享图 ──────────────────────────────────────────
+function generateShareImage() {
+  const btn = document.querySelector('.btn-save');
+  btn.textContent = '生成中…';
+  btn.disabled = true;
+
+  const emoji = document.getElementById('result-emoji').textContent;
+  const pct   = document.getElementById('result-pct').textContent;
+  const title = document.getElementById('result-title').textContent;
+  const sub   = document.getElementById('result-subtitle').textContent;
+
+  document.getElementById('sc-emoji').textContent = emoji;
+  document.getElementById('sc-pct').textContent   = pct;
+  document.getElementById('sc-title').textContent = title;
+  document.getElementById('sc-sub').textContent   = sub;
+
+  const qrEl = document.getElementById('sc-qr');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, {
+    text: window.location.href,
+    width: 72,
+    height: 72,
+    colorDark: '#0A0A1A',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  setTimeout(()=>{
+    html2canvas(document.getElementById('share-card'), {
+      backgroundColor: '#0A0A1A',
+      scale: 2,
+      useCORS: true,
+      logging: false
+    }).then(canvas=>{
+      const img = document.getElementById('share-preview');
+      img.src = canvas.toDataURL('image/png');
+      document.getElementById('share-overlay').classList.add('show');
+      btn.textContent = '生成分享图 ✦';
+      btn.disabled = false;
+    }).catch(()=>{
+      btn.textContent = '生成分享图 ✦';
+      btn.disabled = false;
+      alert('生成失败，请截图保存 📸');
+    });
+  }, 300);
+}
+
+function closeOverlay(e) {
+  if(e) e.stopPropagation();
+  document.getElementById('share-overlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
